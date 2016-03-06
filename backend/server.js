@@ -27,6 +27,7 @@ app.get('/', function (req, res) {
 app.post('/routesNearTrip', function (req, res) {
     var fromLocation = req.body.fromLocation;
     var toLocation = req.body.toLocation;
+    console.log(req.body);
     elastic.search({
         index: 'trails',
         type: 'trail',
@@ -34,6 +35,7 @@ app.post('/routesNearTrip', function (req, res) {
             query: {
                 function_score: {
                     functions: [
+                        /*
                         {
                             gauss: {
                                 'points.location': {
@@ -44,6 +46,7 @@ app.post('/routesNearTrip', function (req, res) {
                             },
                             weight: 2
                         },
+                        */
                         {
                             gauss: {
                                 'points.location': {
@@ -85,11 +88,10 @@ app.post('/routesNearTrip', function (req, res) {
 
             result.imageURL = url;
 
-            console.log(result);
 
             return result;
         });
-        res.send(JSON.stringify(results));
+        res.send(JSON.stringify({routes: results}));
     }, function (err) {
         res.send(JSON.stringify(err));
     })
