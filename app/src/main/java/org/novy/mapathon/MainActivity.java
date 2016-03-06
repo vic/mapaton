@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     String myLong = " ";
     private Location lastLocation;
     private JSONObject routesJSON;
-    private Place targetPlace;
+    private LatLng targetPlace;
 
 
     @Override
@@ -138,6 +138,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                 mRef.setValue("{flag: F01, latitude:" + latitude + ", longitude:"
                         + longitude + ", fecha:" + timestamp + "}");
 
+                Toast.makeText(getApplicationContext(), "Incidente de Robo reportado",
+                        Toast.LENGTH_SHORT).show();
+
+
             }
         });
 
@@ -149,6 +153,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                 String timestamp = new Date().toString();
                 mRef.setValue("{flag: F02, latitude:" + latitude + ", longitude:"
                         + longitude + ", fecha:" + timestamp+"}");
+
+                Toast.makeText(getApplicationContext(), "Incidente de Agresion reportado",
+                        Toast.LENGTH_SHORT).show();
+
             }
         });
 
@@ -160,6 +168,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                 String timestamp = new Date().toString();
                 mRef.setValue("{flag: F03, latitude:" + latitude + ", longitude:"
                         + longitude + ", fecha:" + timestamp+"}");
+
+                Toast.makeText(getApplicationContext(), "Ruta marcada como destacada",
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -213,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             }
             // Get the Place object from the buffer.
             final Place place = places.get(0);
-            targetPlace = place;
+            targetPlace = place.getLatLng();
 
             System.out.println("Going to place "+place);
 
@@ -232,6 +243,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
 
     private void searchRoutes(Place place) throws JSONException {
         JSONObject params = new JSONObject();
+        if (lastLocation == null) {
+            return;
+        }
 
         JSONObject fromLocation = new JSONObject();
         fromLocation.put("lat", lastLocation.getLatitude());
@@ -273,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         JSONObject first = routes.getJSONObject(0);
         NetworkImageView mNetworkImageView = (NetworkImageView) findViewById(R.id.networkImageView);
         ImageLoader mImageLoader = MySingleton.getInstance(this).getImageLoader();
-        mNetworkImageView.setImageUrl(first.getString("imageURL"), mImageLoader);
+        mNetworkImageView.setImageUrl(first.getString("imageURL")+"&zoom=16", mImageLoader);
     }
 
     private void monitorLocation() {
@@ -312,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         if (targetPlace == null) {
             textView.setText("");
         } else {
-            double distance = getDistanceFromLatLonInM(lat, lng, targetPlace.getLatLng().latitude, targetPlace.getLatLng().longitude);
+            double distance = getDistanceFromLatLonInM(lat, lng, targetPlace.latitude, targetPlace.longitude);
             textView.setText("Faltan "+Math.round(distance)+" metros para bajar");
             if (distance <= VIBRATE_ON_DISTANCE_BEFORE_TARGET) {
                 vibrate();
@@ -321,6 +335,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     }
 
     private void vibrate() {
+        Toast.makeText(getApplicationContext(), "BAJAN !!",
+                Toast.LENGTH_SHORT).show();
+
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(new long[]{1000, 1000, 2000, 1000, 3000}, -1);
     }
