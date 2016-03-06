@@ -14,9 +14,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,6 +45,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements LocationListener, GoogleApiClient.OnConnectionFailedListener {
@@ -78,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     private Location lastLocation;
     private JSONObject routesJSON;
     private LatLng targetPlace;
+    private Spinner mySpinner;
 
 
     @Override
@@ -266,6 +270,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                         System.out.println(response);
                         routesJSON = response;
                         try {
+                            renderFirstImage();
                             renderRoutesSelect();
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -283,8 +288,53 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     }
 
     private void renderRoutesSelect() throws JSONException {
+        mySpinner = (Spinner)findViewById(R.id.spinner);
+
+
+        ArrayList<String> listSpinner = new ArrayList<>();
+        final JSONArray routes = this.routesJSON.getJSONArray("routes");
+
+        for(int i = 0; i < routes.length(); i++) {
+            JSONObject route = routes.getJSONObject(i);
+
+            String shortName = route.getString("routeShortName");
+            String shortLongName = route.getString("routeLongName");
+            String imageURL = route.getString("imageURL");
+
+            listSpinner.add(shortName+" | "+shortLongName);
+
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, listSpinner);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mySpinner.setAdapter(adapter);
+        adapter.setNotifyOnChange(true);
+        mySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    JSONObject selectedRoute = routes.getJSONObject(position);
+                    renderRouteImage(selectedRoute);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+    }
+
+    private void renderFirstImage() throws JSONException {
         JSONArray routes = this.routesJSON.getJSONArray("routes");
         JSONObject first = routes.getJSONObject(0);
+        renderRouteImage(first);
+    }
+
+    private void renderRouteImage(JSONObject first) throws JSONException {
         NetworkImageView mNetworkImageView = (NetworkImageView) findViewById(R.id.networkImageView);
         ImageLoader mImageLoader = MySingleton.getInstance(this).getImageLoader();
         mNetworkImageView.setImageUrl(first.getString("imageURL")+"&zoom=16", mImageLoader);
@@ -327,7 +377,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             textView.setText("");
         } else {
             double distance = getDistanceFromLatLonInM(lat, lng, targetPlace.latitude, targetPlace.longitude);
-            textView.setText("Faltan "+Math.round(distance)+" metros para bajar");
+            textView.setText("Faltan " + Math.round(distance) + " metros para bajar");
             if (distance <= VIBRATE_ON_DISTANCE_BEFORE_TARGET) {
                 vibrate();
             }
