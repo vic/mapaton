@@ -15,6 +15,23 @@
         android:layout_height="wrap_content"
         android:text="Hello World!" />
 
+    <AutoCompleteTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Escribe tu destino"
+        android:id="@+id/autoCompleteTextView"
+        android:layout_below="@+id/here"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="87dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rehacer búsqueda"
+        android:id="@+id/button_clear"
+        android:layout_below="@+id/autoCompleteTextView"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="9dp" />
 
 
 </RelativeLayout>
