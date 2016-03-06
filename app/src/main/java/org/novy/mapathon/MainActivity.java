@@ -52,9 +52,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
     private static final long MIN_TIME_BW_UPDATES = 1000;
 
-    private static final double TARGET_LAT = 19.429083;
-    private static final double TARGET_LON = -99.2080252;
-
     private static final int VIBRATE_ON_DISTANCE_BEFORE_TARGET = 100;
 
     /*
@@ -80,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     String myLong = " ";
     private Location lastLocation;
     private JSONObject routesJSON;
+    private Place targetPlace;
 
 
     @Override
@@ -215,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
             }
             // Get the Place object from the buffer.
             final Place place = places.get(0);
+            targetPlace = place;
 
             System.out.println("Going to place "+place);
 
@@ -309,19 +308,16 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         double lat = location.getLatitude();
         double lng = location.getLongitude();
 
-        myLat = Double.toString(lat);
-        myLong = Double.toString(lng);
-
-        double distance = getDistanceFromLatLonInM(lat, lng, TARGET_LAT, TARGET_LON);
-
-
         TextView textView = (TextView) this.findViewById(R.id.here);
-        textView.setText("Faltan "+Math.round(distance)+" metros para bajar");
-
-        if (distance <= VIBRATE_ON_DISTANCE_BEFORE_TARGET) {
-            vibrate();
+        if (targetPlace == null) {
+            textView.setText("");
+        } else {
+            double distance = getDistanceFromLatLonInM(lat, lng, targetPlace.getLatLng().latitude, targetPlace.getLatLng().longitude);
+            textView.setText("Faltan "+Math.round(distance)+" metros para bajar");
+            if (distance <= VIBRATE_ON_DISTANCE_BEFORE_TARGET) {
+                vibrate();
+            }
         }
-
     }
 
     private void vibrate() {
