@@ -8,7 +8,7 @@ var execSync = require('child_process').execSync;
 
 var api = 'https://mapaton-public.appspot.com/_ah/api/dashboardAPI/v1';
 var ecobici = "https://www.ecobici.df.gob.mx/availability_map/getJsonObject";
-var NOE = 500; // numberOfElements per request
+var NOE = 10; // numberOfElements per request
 
 
 function getTrails() {
@@ -48,6 +48,12 @@ function resolvedPromise(obj) {
 
 function pointTransform(point) {
     var deferred = Q.defer();
+
+    delete point.position;
+    delete point.location.radius;
+
+    point.location.lat = point.location.latitude;
+    point.location.lon = point.location.longitude;
 
     if (point.timeStamp) {
         var stamp = point.timeStamp;
